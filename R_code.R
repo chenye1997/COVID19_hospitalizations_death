@@ -1,4 +1,4 @@
-list.of.packages <- c("ggplot2", "dplyr", "broom", "ggpubr", "readxl", "writexl")
+list.of.packages <- c("wesanderson",'gapminder','ggplot2','gganimate','gifski', "dplyr", "broom", "readxl", "writexl")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 lapply(list.of.packages, require, character.only = TRUE)
@@ -18,9 +18,35 @@ write_xlsx(x = final, path = "final.xlsx")
 summary(final)
 final$Governor <- factor(final$Governor)
 final$`Gini Index` <- as.numeric(final$`Gini Index`)
-hist(final$`Death Rate per 100000`)
-hist(final$`Total_beds_per1000`)
-plot(`Total_beds_per1000` ~ `Death Rate per 100000`, data = final)
+ggplot(final, aes(`Total_beds_per1000`,`Death Rate per 100000`,colour=Governor)) +
+  geom_point(size=4,alpha = 20, show.legend = FALSE) +
+  scale_color_manual(values=wes_palette(n=2, name="Cavalcanti1"))+
+  labs(title = 'Beds per1000 vs Death rate per 100000', x = 'Total beds per1000', y = 'Death Rate per 100000')+
+  theme(
+  panel.background = element_rect(fill = "lightcyan",
+                                  colour = "lightblue",
+                                  size = 0.5, linetype = "solid"),
+  panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                  colour = "grey"), 
+  panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                  colour = "grey")
+)
+ggplot(final, aes(`Gini Index`,`Death Rate per 100000`,colour=Governor)) +
+  geom_point(size=4,alpha = 20, show.legend = FALSE) +
+  scale_color_manual(values=wes_palette(n=2, name="Cavalcanti1"))+
+  labs(title = 'Gini Index vs Death rate per 100000', x = 'Gini Index', y = 'Death Rate per 100000')+
+  theme(
+    panel.background = element_rect(fill = "lightcyan",
+                                    colour = "lightblue",
+                                    size = 0.5, linetype = "solid"),
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                    colour = "grey"), 
+    panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                    colour = "grey")
+  )
+# hist(final$`Death Rate per 100000`)
+# hist(final$`Total_beds_per1000`)
+# plot(`Total_beds_per1000` ~ `Death Rate per 100000`, data = final)
 cor(final$`Total_beds_per1000`, final$`Death Rate per 100000`)
 bed.lm <- lm(`Total_beds_per1000` ~ `Death Rate per 100000`, data = final)
 age.lm <-  lm(`MedianAge` ~ `Death Rate per 100000`, data = final)
