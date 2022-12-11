@@ -56,7 +56,7 @@ ggcorr(final,
        label_size = 3,
        color = "grey50")
 ggsave('corrlation.png')
-bed.lm <- lm(`Total_beds_per1000` ~ `Death Rate per 100000`, data = final)
+bed.lm <- lm( `Death Rate per 100000`~`Total_beds_per1000` , data = final)
 ggplot(final,aes(`Total_beds_per1000`, `Death Rate per 100000`)) +
   geom_point()+
   mytheme+stat_smooth(method = "lm", col = "red")+
@@ -65,7 +65,7 @@ ggplot(final,aes(`Total_beds_per1000`, `Death Rate per 100000`)) +
                      " Slope =",signif(bed.lm$coef[[2]], 5),
                      " P =",signif(summary(bed.lm)$coef[2,4], 5)),x = 'Total_beds_per1000', y = 'Death Rate per 100000')
 ggsave('Bed_simple_regression.png')
-age.lm <-  lm(`MedianAge` ~ `Death Rate per 100000`, data = final)
+age.lm <-  lm(`Death Rate per 100000`~`MedianAge` , data = final)
 ggplot(final,aes(`MedianAge`, `Death Rate per 100000`)) +
   geom_point()+
   labs(title = 'MedianAge vs Death rate per 100000', x = 'MedianAge', y = 'Death Rate per 100000')+
@@ -75,7 +75,7 @@ ggplot(final,aes(`MedianAge`, `Death Rate per 100000`)) +
                      " Slope =",signif(age.lm$coef[[2]], 5),
                      " P =",signif(summary(age.lm)$coef[2,4], 5)))
 ggsave('age_simple_regression.png')
-gini.lm <- lm(`Gini Index` ~ `Death Rate per 100000`, data = final)
+gini.lm <- lm(`Death Rate per 100000`~`Gini Index` , data = final)
 ggplot(final,aes(`Gini Index`, `Death Rate per 100000`)) +
   geom_point()+
   labs(title = 'MedianAge vs Death rate per 100000', x = 'Gini Index', y = 'Death Rate per 100000')+
