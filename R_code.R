@@ -115,3 +115,4 @@ summary(final.lm)
 summary(bed.lm)
 summary(age.lm)
 summary(gini.lm)
+
