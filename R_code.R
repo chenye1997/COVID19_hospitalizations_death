@@ -31,7 +31,7 @@ ggplot(final, aes(`Total_beds_per1000`,`Death Rate per 100000`,colour=Governor))
   geom_point(size=4,alpha = 20, show.legend = FALSE) +
   scale_color_manual(values=wes_palette(n=2, name="Cavalcanti1"))+
   labs(title = 'Beds per1000 vs Death rate per 100000', x = 'Total beds per1000', y = 'Death Rate per 100000')+
-  +mytheme
+  mytheme
 ggsave("Beds_vs_Deathrate(scatterplot).png")
 ggplot(final, aes(`Gini Index`,`Death Rate per 100000`,colour=Governor)) +
   geom_point(size=4,alpha = 20, show.legend = TRUE) +
@@ -59,20 +59,12 @@ ggsave('corrlation.png')
 bed.lm <- lm(`Total_beds_per1000` ~ `Death Rate per 100000`, data = final)
 ggplot(final,aes(`Total_beds_per1000`, `Death Rate per 100000`)) +
   geom_point()+
-  theme(
-    panel.background = element_rect(fill = "lightcyan",
-                                    colour = "lightblue",
-                                    size = 0.5, linetype = "solid"),
-    panel.grid.major = element_line(size = 0.5, linetype = 'solid',
-                                    colour = "grey"), 
-    panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
-                                    colour = "grey")
-  )+stat_smooth(method = "lm", col = "red")+
+  mytheme+stat_smooth(method = "lm", col = "red")+
   labs(title = paste("Adj R2 = ",signif(summary(bed.lm)$adj.r.squared, 5),
                      "Intercept =",signif(bed.lm$coef[[1]],5 ),
                      " Slope =",signif(bed.lm$coef[[2]], 5),
                      " P =",signif(summary(bed.lm)$coef[2,4], 5)),x = 'Total_beds_per1000', y = 'Death Rate per 100000')
-ggsave('Bed_simple_regression')
+ggsave('Bed_simple_regression.png')
 age.lm <-  lm(`MedianAge` ~ `Death Rate per 100000`, data = final)
 ggplot(final,aes(`MedianAge`, `Death Rate per 100000`)) +
   geom_point()+
@@ -108,9 +100,9 @@ final$`Death Rate per 100000`
 ggplot(final, aes(x=predict(final.lm), y=`Death Rate per 100000`)) +
   geom_point() +
   geom_abline(intercept=0, slope=1) +
-  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
-  +mytheme
-ggsave("predicted_vs_pbserved.png")
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')+
+  mytheme
+ggsave("predicted_vs_observed.png")
 summary(final.lm)
 summary(bed.lm)
 summary(age.lm)
