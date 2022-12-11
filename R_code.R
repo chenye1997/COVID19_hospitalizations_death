@@ -1,4 +1,4 @@
-list.of.packages <- c("wesanderson",'gapminder','ggplot2','gganimate','gifski', "dplyr", "broom", "readxl", "writexl")
+list.of.packages <- c('ggiraphExtra','moonBook',"GGally","wesanderson",'gapminder','ggplot2','gganimate','gifski', "dplyr", "broom", "readxl", "writexl")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 lapply(list.of.packages, require, character.only = TRUE)
@@ -10,14 +10,13 @@ gini<-read_excel('gini index.xlsx')
 beds<-read.csv("states_beds_per1000.csv")
 beds<-beds[c(1,5)]
 deaths<- deaths[c(1,7)]
-final1<- merge(deaths, govenors, by = "State")
-final2 <- merge(gini, age, by = "State")
-final <- merge(final1, final2, by = "State")
-final <- merge(final,beds,by="State")
-write_xlsx(x = final, path = "final.xlsx")
-summary(final)
+df_list <- list(deaths, govenors, gini,beds,age)
+final<-Reduce(function(x, y) merge(x, y, all=TRUE), df_list)
 final$Governor <- factor(final$Governor)
 final$`Gini Index` <- as.numeric(final$`Gini Index`)
+final$`Gini Index` <- final$`Gini Index`*100
+write_xlsx(x = final, path = "final.xlsx")
+summary(final)
 ggplot(final, aes(`Total_beds_per1000`,`Death Rate per 100000`,colour=Governor)) +
   geom_point(size=4,alpha = 20, show.legend = FALSE) +
   scale_color_manual(values=wes_palette(n=2, name="Cavalcanti1"))+
@@ -31,8 +30,9 @@ ggplot(final, aes(`Total_beds_per1000`,`Death Rate per 100000`,colour=Governor))
   panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                   colour = "grey")
 )
+ggsave("Beds_vs_Deathrate(scatterplot).png")
 ggplot(final, aes(`Gini Index`,`Death Rate per 100000`,colour=Governor)) +
-  geom_point(size=4,alpha = 20, show.legend = FALSE) +
+  geom_point(size=4,alpha = 20, show.legend = TRUE) +
   scale_color_manual(values=wes_palette(n=2, name="Cavalcanti1"))+
   labs(title = 'Gini Index vs Death rate per 100000', x = 'Gini Index', y = 'Death Rate per 100000')+
   theme(
@@ -44,16 +44,88 @@ ggplot(final, aes(`Gini Index`,`Death Rate per 100000`,colour=Governor)) +
     panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                     colour = "grey")
   )
+ggsave("Giniindex_vs_Deathrate.png")
+ggplot(final, aes(`MedianAge`,`Death Rate per 100000`,colour=Governor)) +
+  geom_point(size=4,alpha = 20, show.legend = TRUE) +
+  scale_color_manual(values=wes_palette(n=2, name="Cavalcanti1"))+
+  labs(title = 'MedianAge vs Death rate per 100000', x = 'MedianAge', y = 'Death Rate per 100000')+
+  theme(
+    panel.background = element_rect(fill = "lightcyan",
+                                    colour = "lightblue",
+                                    size = 0.5, linetype = "solid"),
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                    colour = "grey"), 
+    panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                    colour = "grey")
+  )
+ggsave("Age_vs_Deathrate.png")
 # hist(final$`Death Rate per 100000`)
 # hist(final$`Total_beds_per1000`)
 # plot(`Total_beds_per1000` ~ `Death Rate per 100000`, data = final)
-cor(final$`Total_beds_per1000`, final$`Death Rate per 100000`)
+ggcorr(final,
+       method = c("pairwise", "spearman"),
+       nbreaks = 6,
+       hjust = 0.8,
+       label = TRUE,
+       label_size = 3,
+       color = "grey50")
 bed.lm <- lm(`Total_beds_per1000` ~ `Death Rate per 100000`, data = final)
+ggplot(final,aes(`Total_beds_per1000`, `Death Rate per 100000`)) +
+  geom_point()+
+  theme(
+    panel.background = element_rect(fill = "lightcyan",
+                                    colour = "lightblue",
+                                    size = 0.5, linetype = "solid"),
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                    colour = "grey"), 
+    panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                    colour = "grey")
+  )+stat_smooth(method = "lm", col = "red")+
+  labs(title = paste("Adj R2 = ",signif(summary(bed.lm)$adj.r.squared, 5),
+                     "Intercept =",signif(bed.lm$coef[[1]],5 ),
+                     " Slope =",signif(bed.lm$coef[[2]], 5),
+                     " P =",signif(summary(bed.lm)$coef[2,4], 5)),x = 'Total_beds_per1000', y = 'Death Rate per 100000')
+ggsave('Bed_simple_regression')
 age.lm <-  lm(`MedianAge` ~ `Death Rate per 100000`, data = final)
+ggplot(final,aes(`MedianAge`, `Death Rate per 100000`)) +
+  geom_point()+
+  labs(title = 'MedianAge vs Death rate per 100000', x = 'MedianAge', y = 'Death Rate per 100000')+
+  theme(
+    panel.background = element_rect(fill = "lightcyan",
+                                    colour = "lightblue",
+                                    size = 0.5, linetype = "solid"),
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                    colour = "grey"), 
+    panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                    colour = "grey")
+  )+stat_smooth(method = "lm", col = "red")+
+  labs(title = paste("Adj R2 = ",signif(summary(age.lm)$adj.r.squared, 5),
+                     "Intercept =",signif(age.lm$coef[[1]],5 ),
+                     " Slope =",signif(age.lm$coef[[2]], 5),
+                     " P =",signif(summary(age.lm)$coef[2,4], 5)))
+ggsave('age_simple_regression.png')
 gini.lm <- lm(`Gini Index` ~ `Death Rate per 100000`, data = final)
+ggplot(final,aes(`Gini Index`, `Death Rate per 100000`)) +
+  geom_point()+
+  labs(title = 'MedianAge vs Death rate per 100000', x = 'Gini Index', y = 'Death Rate per 100000')+
+  theme(
+    panel.background = element_rect(fill = "lightcyan",
+                                    colour = "lightblue",
+                                    size = 0.5, linetype = "solid"),
+    panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                    colour = "grey"), 
+    panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                    colour = "grey")
+  )+stat_smooth(method = "lm", col = "red")+
+  labs(title = paste("Adj R2 = ",signif(summary(gini.lm)$adj.r.squared, 5),
+                     "Intercept =",signif(gini.lm$coef[[1]],5 ),
+                     " Slope =",signif(gini.lm$coef[[2]], 5),
+                     " P =",signif(summary(gini.lm)$coef[2,4], 5)))
+ggsave('gini_simple_regression.png')
 final.lm <- glm(`Death Rate per 100000`~`Total_beds_per1000` + `MedianAge` + `Gini Index` + `Governor`,
                 data = final
-                )
+)
+plot(final.lm)
 summary(final.lm)
 summary(bed.lm)
 summary(age.lm)
