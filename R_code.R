@@ -25,6 +25,15 @@ mytheme <-  theme(
   panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                   colour = "grey")
 )
+ggplot(final, aes(x=MedianAge)) + 
+  geom_histogram(binwidth=.25, colour="black", fill="white")+mytheme
+ggsave('age.png')
+ggplot(final, aes(x=`Gini Index`)) + 
+  geom_histogram(binwidth=.25, colour="black", fill="white")+mytheme
+ggsave('gini index.png')
+ggplot(final, aes(x=`Total_beds_per1000`)) + 
+  geom_histogram(binwidth=.25, colour="black", fill="white")+mytheme
+ggsave('beds.png')
 write_xlsx(x = final, path = "final.xlsx")
 summary(final)
 ggplot(final, aes(`Total_beds_per1000`,`Death Rate per 100000`,colour=Governor)) +
